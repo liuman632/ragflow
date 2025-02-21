@@ -1,6 +1,6 @@
 import { useLogin, useRegister } from '@/hooks/login-hooks';
 import { rsaPsw } from '@/utils';
-import { Button, Form, Input } from 'antd';
+import { Button, Form, Input, message } from 'antd';
 import { Popover } from 'antd-mobile'
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -43,9 +43,6 @@ const Login = () => {
     { key: 'en', text: 'English', icon: <EnIcon />, iconName: 'icon_En' },
   ]
 
-  const changeTitle = () => {
-    // setTitle((title) => (title === 'login' ? 'register' : 'login'));
-  };
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -55,9 +52,12 @@ const Login = () => {
   const onCheck = async () => {
     try {
       const params = await form.validateFields();
-
+      const { password, confirmPassword } = params
+      if(title === 'register' && password !== confirmPassword) {
+        message.warning(t('registWarning'))
+        return false
+      }
       const rsaPassWord = rsaPsw(params.password) as string;
-
       if (title === 'login') {
         const code = await login({
           email: `${params.email}`.trim(),
@@ -81,6 +81,12 @@ const Login = () => {
     }
   };
 
+  const changeTitle = () => {
+    setTitle((title) => (title === 'login' ? 'register' : 'login'));
+    form.setFieldsValue({})
+    form.resetFields()
+  };
+
   /**
    * @description 切换主题色
    * @param value 是否check值
@@ -102,7 +108,7 @@ const Login = () => {
   }
 
   const formItemLayout = {
-    labelCol: { span: 6 },
+    labelCol: { span: 8 },
     // wrapperCol: { span: 8 },
   };
 
@@ -171,6 +177,32 @@ const Login = () => {
             name="dynamic_rule"
             style={{ maxWidth: 600 }}
           >
+            {title === 'register' && (
+              <>
+                <Form.Item
+                  {...formItemLayout}
+                  name="email"
+                  label={t('emailLabel')}
+                  rules={[
+                    { required: true, message: t('emailPlaceholder') },
+                    {
+                      pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      message: t('emailCheck'),
+                    }
+                  ]}
+                >
+                  <Input size="large" placeholder={t('emailPlaceholder')} className={styles.loginInput} />
+                </Form.Item>
+                <Form.Item
+                  {...formItemLayout}
+                  name="nickname"
+                  label={t('nameLabel')}
+                  rules={[{ required: true, message: t('namePlaceholder') }]}
+                >
+                  <Input size="large" placeholder={t('namePlaceholder')} />
+                </Form.Item>
+              </>
+            )}
             {/* <Form.Item
             {...formItemLayout}
             name="email"
@@ -198,10 +230,20 @@ const Login = () => {
               <Input.Password
                 size="large"
                 placeholder={t('passwordPlaceholder')}
-                onPressEnter={onCheck}
+                // onPressEnter={onCheck}
                 className={styles.loginInput}
               />
             </Form.Item>
+            {title === 'register' && (
+              <Form.Item
+                {...formItemLayout}
+                name="confirmPassword"
+                label={t('confirmPwLabel')}
+                rules={[{ required: true, message: t('confirmPwPlaceholder') }]}
+              >
+                <Input.Password size="large" placeholder={t('confirmPwPlaceholder')} className={styles.loginInput} />
+              </Form.Item>
+            )}
             {/* {title === 'login' && (
               <Form.Item name="remember" valuePropName="checked">
                 <Checkbox> {t('rememberMe')}</Checkbox>
@@ -215,23 +257,31 @@ const Login = () => {
               loading={loading}
               className={styles.loginBtn}
             >
-              {title === 'login' ? t('login') : t('continue')}
+              {title === 'login' ? t('login') : t('regist')}
             </Button>
             <div className={styles.forgetTipPanel}>
               {title === 'login' && (
-                <div>
-                  {t('signInTip')}
-                  <Button type="link" onClick={changeTitle}>
-                    {t('connectAdmin')}
-                  </Button>
-                </div>
+                <>
+                  <div>
+                    {t('withoutAccount')}
+                    <a onClick={changeTitle} className={styles.registLink}>
+                      {t('currentRegist')}
+                    </a>
+                  </div>
+                  <div>
+                    {t('signInTip')}
+                    <a onClick={changeTitle} className={styles.connectLink}>
+                      {t('connectAdmin')}
+                    </a>
+                  </div>
+                </>
               )}
               {title === 'register' && (
                 <div>
                   {t('signUpTip')}
-                  <Button type="link" onClick={changeTitle}>
+                  <a onClick={changeTitle} className={styles.registLink}>
                     {t('login')}
-                  </Button>
+                  </a>
                 </div>
               )}
             </div>
