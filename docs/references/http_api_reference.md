@@ -9,6 +9,154 @@ A complete reference for RAGFlow's RESTful API. Before proceeding, please ensure
 
 ---
 
+## OpenAI-Compatible API
+
+---
+
+### Create chat completion
+
+**POST** `/api/v1/chats_openai/{chat_id}/chat/completions`
+
+Creates a model response for a given chat conversation.
+
+This API follows the same request and response format as OpenAI's API. It allows you to interact with the model in a manner similar to how you would with [OpenAI's API](https://platform.openai.com/docs/api-reference/chat/create).
+
+#### Request
+
+- Method: POST
+- URL: `/api/v1/chats_openai/{chat_id}/chat/completions`
+- Headers:
+  - `'content-Type: application/json'`
+  - `'Authorization: Bearer <YOUR_API_KEY>'`
+- Body:
+  - `"model"`: `string`
+  - `"messages"`: `object list`
+  - `"stream"`: `boolean`
+
+##### Request example
+
+```bash
+curl --request POST \
+     --url http://{address}/api/v1/chats_openai/{chat_id}/chat/completions \
+     --header 'Content-Type: application/json' \
+     --header 'Authorization: Bearer <YOUR_API_KEY>' \
+     --data '{
+        "model": "model",
+        "messages": [{"role": "user", "content": "Say this is a test!"}],
+        "stream": true
+      }'
+```
+
+##### Request Parameters
+
+- `model` (*Body parameter*) `string`, *Required*
+  The model used to generate the response. The server will parse this automatically, so you can set it to any value for now.
+
+- `messages` (*Body parameter*) `list[object]`, *Required*
+  A list of historical chat messages used to generate the response. This must contain at least one message with the `user` role.
+
+- `stream` (*Body parameter*) `boolean`
+  Whether to receive the response as a stream. Set this to `false` explicitly if you prefer to receive the entire response in one go instead of as a stream.
+
+#### Response
+
+Stream:
+
+```json
+{
+    "id": "chatcmpl-3a9c3572f29311efa69751e139332ced",
+    "choices": [
+        {
+            "delta": {
+                "content": "This is a test. If you have any specific questions or need information, feel",
+                "role": "assistant",
+                "function_call": null,
+                "tool_calls": null
+            },
+            "finish_reason": null,
+            "index": 0,
+            "logprobs": null
+        }
+    ],
+    "created": 1740543996,
+    "model": "model",
+    "object": "chat.completion.chunk",
+    "system_fingerprint": "",
+    "usage": null
+}
+// omit duplicated information
+{"choices":[{"delta":{"content":" free to ask, and I will do my best to provide an answer based on","role":"assistant"}}]}
+{"choices":[{"delta":{"content":" the knowledge I have. If your question is unrelated to the provided knowledge base,","role":"assistant"}}]}
+{"choices":[{"delta":{"content":" I will let you know.","role":"assistant"}}]}
+// the last chunk
+{
+    "id": "chatcmpl-3a9c3572f29311efa69751e139332ced",
+    "choices": [
+        {
+            "delta": {
+                "content": null,
+                "role": "assistant",
+                "function_call": null,
+                "tool_calls": null
+            },
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null
+        }
+    ],
+    "created": 1740543996,
+    "model": "model",
+    "object": "chat.completion.chunk",
+    "system_fingerprint": "",
+    "usage": {
+        "prompt_tokens": 18,
+        "completion_tokens": 225,
+        "total_tokens": 243
+    }
+}
+```
+
+Non-stream:
+
+```json
+{
+    "choices":[
+        {
+            "finish_reason":"stop",
+            "index":0,
+            "logprobs":null,
+            "message":{
+                "content":"This is a test. If you have any specific questions or need information, feel free to ask, and I will do my best to provide an answer based on the knowledge I have. If your question is unrelated to the provided knowledge base, I will let you know.",
+                "role":"assistant"
+            }
+        }
+    ],
+    "created":1740543499,
+    "id":"chatcmpl-3a9c3572f29311efa69751e139332ced",
+    "model":"model",
+    "object":"chat.completion",
+    "usage":{
+        "completion_tokens":246,
+        "completion_tokens_details":{
+            "accepted_prediction_tokens":246,
+            "reasoning_tokens":18,
+            "rejected_prediction_tokens":0
+        },
+        "prompt_tokens":18,
+        "total_tokens":264
+    }
+}
+```
+
+Failure:
+
+```json
+{
+  "code": 102,
+  "message": "The last content of this conversation is not from user."
+}
+```
+
 ## DATASET MANAGEMENT
 
 ---
@@ -2178,10 +2326,12 @@ Creates a session with an agent.
 - Body:
   - the required parameters:`str`
   - other parameters:
-    The parameters in the begin component.
+    The parameters specified in the **Begin** component.
 
 ##### Request example
-If `begin` component in the agent doesn't have required parameters:
+
+If the **Begin** component in your agent does not take required parameters:
+
 ```bash
 curl --request POST \
      --url http://{address}/api/v1/agents/{agent_id}/sessions \
@@ -2190,7 +2340,9 @@ curl --request POST \
      --data '{
      }'
 ```
-If `begin` component in the agent has required parameters:
+
+If the **Begin** component in your agent takes required parameters:
+
 ```bash
 curl --request POST \
      --url http://{address}/api/v1/agents/{agent_id}/sessions \
@@ -2201,7 +2353,9 @@ curl --request POST \
             "file":"Who are you"
      }'
 ```
-If `begin` component in the agent has required file parameters:
+
+If the **Begin** component in your agent takes required file parameters:
+
 ```bash
 curl --request POST \
      --url http://{address}/api/v1/agents/{agent_id}/sessions?user_id={user_id} \
@@ -2214,8 +2368,8 @@ curl --request POST \
 
 - `agent_id`: (*Path parameter*)  
   The ID of the associated agent.
-- `user_id`: (*Filter parameter*), string
-  The optional user-defined ID for parsing docs(especially images) when creating session while uploading files.
+- `user_id`: (*Filter parameter*)
+  The optional user-defined ID for parsing docs (especially images) when creating a session while uploading files.
 
 #### Response
 
@@ -2367,7 +2521,7 @@ Asks a specified agent a question to start an AI-powered conversation.
   - `"user_id"`: `string`(optional)
   - other parameters: `string`
 ##### Request example
-If the `begin` component doesn't have parameters, the following code will create a session.
+If the **Begin** component does not take parameters, the following code will create a session.
 ```bash 
 curl --request POST \
      --url http://{address}/api/v1/agents/{agent_id}/completions \
@@ -2377,7 +2531,7 @@ curl --request POST \
      {
      }'
 ```
-If the `begin` component have parameters, the following code will create a session.
+If the **Begin** component takes parameters, the following code will create a session.
 ```bash
 curl --request POST \
      --url http://{address}/api/v1/agents/{agent_id}/completions \
@@ -2403,7 +2557,6 @@ curl --request POST \
      }'
 ```
 
-
 ##### Request Parameters
 
 - `agent_id`: (*Path parameter*), `string`  
@@ -2419,9 +2572,10 @@ curl --request POST \
 - `"user_id"`: (*Body parameter*), `string`  
   The optional user-defined ID. Valid *only* when no `session_id` is provided.
 - Other parameters: (*Body Parameter*)  
-  The parameters in the begin component.
+  Parameters specified in the **Begin** component.
+
 #### Response
-success without `session_id` provided and with no parameters in the `begin` component:
+success without `session_id` provided and with no parameters specified in the **Begin** component:
 ```json
 data:{
     "code": 0,
@@ -2439,7 +2593,8 @@ data:{
     "data": true
 }
 ```
-Success without `session_id` provided and with parameters in the `begin` component:
+
+Success without `session_id` provided and with parameters specified in the **Begin** component:
 
 ```json
 data:{
@@ -2475,7 +2630,7 @@ data:{
 }
 data:
 ```
-Success with parameters in the `begin` component:
+Success with parameters specified in the **Begin** component:
 ```json
 data:{
     "code": 0,
@@ -2553,7 +2708,6 @@ data:{
     "data": true
 }
 ```
-
 
 Failure:
 
