@@ -67,12 +67,12 @@ const RagHeader = () => {
     >
       <a href={window.location.origin}>
         <Space
-          size={12}
+          // size={12}
           onClick={handleLogoClick}
           className={styles.logoWrapper}
         >
-          <img src="/logo.svg" alt="" className={styles.appIcon} />
-          <span className={styles.appName}>{appConf.appName}</span>
+          <div className={styles.appIcon}></div>
+          <div className={styles.appName}>{appConf.appName}</div>
         </Space>
       </a>
       <Space size={[0, 8]} wrap>

@@ -1,0 +1,20 @@
+.uncheckedSwitch {
+  background-color: #072365;
+  .ant-switch-handle::before {
+    background-color: #9ba6bb !important;
+    background-image: url('@/assets/svg/icon-dark.svg');
+    background-size: cover;
+  }
+  &:hover .ant-switch-inner {
+    background-color: #0d42be;
+  }
+}
+
+.checkedSwitch {
+  background-color: #2761f6;
+  .ant-switch-handle::before {
+    background-color: #fff;
+    background-image: url('@/assets/svg/icon-wrapper.svg');
+    background-size: cover;
+  }
+}
