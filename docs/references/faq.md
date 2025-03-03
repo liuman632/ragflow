@@ -22,7 +22,7 @@ The "garbage in garbage out" status quo remains unchanged despite the fact that 
 
 ---
 
-### Where to find the version of RAGFlow? How to interprete it?
+### Where to find the version of RAGFlow? How to interpret it?
 
 You can find the RAGFlow version number on the **System** page of the UI:
 
@@ -37,12 +37,12 @@ If you build RAGFlow from source, the version number is also in the system log:
      / _, _// ___ |/ /_/ // __/  / // /_/ /| |/ |/ / 
     /_/ |_|/_/  |_|\____//_/    /_/ \____/ |__/|__/                             
 
-2025-02-18 10:10:43,835 INFO     1445658 RAGFlow version: v0.16.0-50-g6daae7f2 full
+2025-02-18 10:10:43,835 INFO     1445658 RAGFlow version: v0.17.0-50-g6daae7f2 full
 ```
 
 Where:
 
-- `v0.16.0`: The officially published release.
+- `v0.17.0`: The officially published release.
 - `50`: The number of git commits since the official release.
 - `g6daae7f2`: `g` is the prefix, and `6daae7f2` is the first seven characters of the current commit ID.
 - `full`/`slim`: The RAGFlow edition.
@@ -71,10 +71,10 @@ We officially support x86 CPU and nvidia GPU. While we also test RAGFlow on ARM6
 
 ### Which embedding models can be deployed locally?
 
-RAGFlow offers two Docker image editions, `v0.16.0-slim` and `v0.16.0`:  
+RAGFlow offers two Docker image editions, `v0.17.0-slim` and `v0.17.0`:  
   
-- `infiniflow/ragflow:v0.16.0-slim` (default): The RAGFlow Docker image without embedding models.  
-- `infiniflow/ragflow:v0.16.0`: The RAGFlow Docker image with embedding models including:
+- `infiniflow/ragflow:v0.17.0-slim` (default): The RAGFlow Docker image without embedding models.  
+- `infiniflow/ragflow:v0.17.0`: The RAGFlow Docker image with embedding models including:
   - Built-in embedding models:
     - `BAAI/bge-large-zh-v1.5`
     - `BAAI/bge-reranker-v2-m3`
@@ -345,13 +345,13 @@ Your IP address or port number may be incorrect. If you are using the default co
 A correct Ollama IP address and port is crucial to adding models to Ollama:
 
 - If you are on demo.ragflow.io, ensure that the server hosting Ollama has a publicly accessible IP address. Note that 127.0.0.1 is not a publicly accessible IP address.
-- If you deploy RAGFlow locally, ensure that Ollama and RAGFlow are in the same LAN and can comunicate with each other.
+- If you deploy RAGFlow locally, ensure that Ollama and RAGFlow are in the same LAN and can communicate with each other.
 
 See [Deploy a local LLM](../guides/deploy_local_llm.mdx) for more information.
 
 ---
 
-#### Do you offer examples of using deepdoc to parse PDF or other files?
+#### Do you offer examples of using DeepDoc to parse PDF or other files?
 
 Yes, we do. See the Python files under the **rag/app** folder.
 
