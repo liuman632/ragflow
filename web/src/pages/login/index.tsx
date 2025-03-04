@@ -285,22 +285,8 @@ const Login = () => {
                 </div>
               )}
             </div>
-            {title === 'login' && (
+            {/* {title === 'login' && (
               <>
-                {/* <Button
-                  block
-                  size="large"
-                  onClick={toGoogle}
-                  style={{ marginTop: 15 }}
-                >
-                  <div>
-                    <Icon
-                      icon="local:google"
-                      style={{ verticalAlign: 'middle', marginRight: 5 }}
-                    />
-                    Sign in with Google
-                  </div>
-                </Button> */}
                 {location.host === Domain && (
                   <Button
                     block
@@ -318,7 +304,7 @@ const Login = () => {
                   </Button>
                 )}
               </>
-            )}
+            )} */}
           </Form>
         </div>
         <div className={styles.copyrightPanel}>
