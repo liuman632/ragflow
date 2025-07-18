@@ -67,12 +67,13 @@ def init_settings():
     DATABASE = decrypt_database_config(name=DATABASE_TYPE)
     LLM = get_base_config("user_default_llm", {})
     LLM_DEFAULT_MODELS = LLM.get("default_models", {})
-    LLM_FACTORY = LLM.get("factory", "Tongyi-Qianwen")
+    LLM_FACTORY = LLM.get("factory", "VLLM")
     LLM_BASE_URL = LLM.get("base_url")
 
     global CHAT_MDL, EMBEDDING_MDL, RERANK_MDL, ASR_MDL, IMAGE2TEXT_MDL
     if not LIGHTEN:
-        EMBEDDING_MDL = "BAAI/bge-large-zh-v1.5@BAAI"
+        EMBEDDING_MDL = "bge-m3___VLLM@VLLM"
+        CHAT_MDL = "Qwen3-235B-A22B___VLLM@VLLM"
 
     if LLM_DEFAULT_MODELS:
         CHAT_MDL = LLM_DEFAULT_MODELS.get("chat_model", CHAT_MDL)

@@ -24,7 +24,7 @@ from api.db import LLMType
 from api.db.db_models import DB
 from api.db.db_models import LLMFactories, LLM, TenantLLM
 from api.db.services.common_service import CommonService
-
+from api.db.services.user_service import TenantService
 
 class LLMFactoriesService(CommonService):
     model = LLMFactories
@@ -87,6 +87,10 @@ class TenantLLMService(CommonService):
     @classmethod
     @DB.connection_context()
     def get_model_config(cls, tenant_id, llm_type, llm_name=None):
+        tenants = TenantService.get_joined_tenants_by_user_id(tenant_id)
+        if tenants:
+            tenant_id = tenants[0]["tenant_id"]
+
         e, tenant = TenantService.get_by_id(tenant_id)
         if not e:
             raise LookupError("Tenant not found")

@@ -24,6 +24,7 @@ from api.utils.api_utils import get_json_result, server_error_response, validate
 from agent.canvas import Canvas
 from peewee import MySQLDatabase, PostgresqlDatabase
 from api.db.db_models import APIToken
+from api.db.services.user_service import TenantService
 
 
 @manager.route('/templates', methods=['GET'])  # noqa: F821
@@ -35,8 +36,13 @@ def templates():
 @manager.route('/list', methods=['GET'])  # noqa: F821
 @login_required
 def canvas_list():
+    tenants = TenantService.get_joined_tenants_by_user_id(current_user.id)
+    if tenants:
+        tenant_id = tenants[0]["tenant_id"]
+    else:
+        tenant_id = current_user.id
     return get_json_result(data=sorted([c.to_dict() for c in \
-                                 UserCanvasService.query(user_id=current_user.id)], key=lambda x: x["update_time"]*-1)
+                                 UserCanvasService.query(user_id=tenant_id)], key=lambda x: x["update_time"]*-1)
                            )
 
 
@@ -58,19 +64,24 @@ def rm():
 @login_required
 def save():
     req = request.json
-    req["user_id"] = current_user.id
+    tenants = TenantService.get_joined_tenants_by_user_id(current_user.id)
+    if tenants:
+        user_id = tenants[0]["tenant_id"]
+    else:
+        user_id = current_user.id
+    req["user_id"] = user_id
     if not isinstance(req["dsl"], str):
         req["dsl"] = json.dumps(req["dsl"], ensure_ascii=False)
 
     req["dsl"] = json.loads(req["dsl"])
     if "id" not in req:
-        if UserCanvasService.query(user_id=current_user.id, title=req["title"].strip()):
+        if UserCanvasService.query(user_id=user_id, title=req["title"].strip()):
             return get_data_error_result(message=f"{req['title'].strip()} already exists.")
         req["id"] = get_uuid()
         if not UserCanvasService.save(**req):
             return get_data_error_result(message="Fail to save canvas.")
     else:
-        if not UserCanvasService.query(user_id=current_user.id, id=req["id"]):
+        if not UserCanvasService.query(user_id=user_id, id=req["id"]):
             return get_json_result(
                 data=False, message='Only owner of canvas authorized for this operation.',
                 code=RetCode.OPERATING_ERROR)

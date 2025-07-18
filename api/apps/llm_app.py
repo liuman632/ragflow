@@ -26,7 +26,7 @@ from api.db.db_models import TenantLLM
 from api.utils.api_utils import get_json_result
 from api.utils.file_utils import get_project_base_directory
 from rag.llm import EmbeddingModel, ChatModel, RerankModel, CvModel, TTSModel
-
+from api.db.services.user_service import TenantService
 
 @manager.route('/factories', methods=['GET'])  # noqa: F821
 @login_required
@@ -305,7 +305,12 @@ def delete_factory():
 def my_llms():
     try:
         res = {}
-        for o in TenantLLMService.get_my_llms(current_user.id):
+        tenants = TenantService.get_joined_tenants_by_user_id(current_user.id)
+        if tenants:
+            user_id = tenants[0]["tenant_id"]
+        else:
+            user_id = current_user.id
+        for o in TenantLLMService.get_my_llms(user_id):
             if o["llm_factory"] not in res:
                 res[o["llm_factory"]] = {
                     "tags": o["tags"],
@@ -328,7 +333,12 @@ def list_app():
     weighted = ["Youdao", "FastEmbed", "BAAI"] if settings.LIGHTEN != 0 else []
     model_type = request.args.get("model_type")
     try:
-        objs = TenantLLMService.query(tenant_id=current_user.id)
+        tenants = TenantService.get_joined_tenants_by_user_id(current_user.id)
+        if tenants:
+            tenant_id = tenants[0]["tenant_id"]
+        else:
+            tenant_id = current_user.id
+        objs = TenantLLMService.query(tenant_id=tenant_id)
         facts = set([o.to_dict()["llm_factory"] for o in objs if o.api_key])
         llms = LLMService.get_all()
         llms = [m.to_dict()
